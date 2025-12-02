@@ -38,9 +38,11 @@ fun <T> Iterable<T>.byNth(n: Int): List<List<T>> {
     }
     return result
 }
-
-fun Int.pow(exponent: Int): Int = toBigInteger().pow(exponent).toInt()
-fun Long.pow(exponent: Int): Long = toBigInteger().pow(exponent).toLong()
+fun <T> Iterable<Iterable<T>>.cartesianProduct(): List<List<T>> {
+    return this.fold(listOf(listOf())) { acc, list ->
+        acc.flatMap { accList -> list.map { accList + it } }
+    }
+}
 
 fun <A, B> Iterable<A>.cartesianProduct(other: Iterable<B>): Sequence<Pair<A, B>> = sequence {
     forEach { a ->
