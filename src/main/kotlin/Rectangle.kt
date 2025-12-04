@@ -383,31 +383,31 @@ fun <T> Rectangle<T>.toMutableRectangle(): MutableRectangle<T> {
     return MutableRectangleImpl(width, height) { x, y -> get(x, y) }
 }
 
-fun <T> Rectangle<T>.neighbours(x: Int, y: Int): Map<Side, Pair<T, Rectangle.Coordinate>> {
-    val result = mutableMapOf<Side, Pair<T, Rectangle.Coordinate>>()
+fun <T> Rectangle<T>.neighbours(x: Int, y: Int): Map<Side, Pair<Rectangle.Coordinate, T>> {
+    val result = mutableMapOf<Side, Pair<Rectangle.Coordinate, T>>()
     if (isInBounds(x, y - 1)) {
-        result[Side.North] = this[x, y - 1] to Rectangle.Coordinate(x, y - 1)
+        result[Side.North] = Rectangle.Coordinate(x, y - 1) to this[x, y - 1]
     }
     if (isInBounds(x + 1, y)) {
-        result[Side.East] = this[x + 1, y] to Rectangle.Coordinate(x + 1, y)
+        result[Side.East] =  Rectangle.Coordinate(x + 1, y) to this[x + 1, y]
     }
     if (isInBounds(x, y + 1)) {
-        result[Side.South] = this[x, y + 1] to Rectangle.Coordinate(x, y + 1)
+        result[Side.South] =  Rectangle.Coordinate(x, y + 1) to this[x, y + 1]
     }
     if (isInBounds(x - 1, y)) {
-        result[Side.West] = this[x - 1, y] to Rectangle.Coordinate(x - 1, y)
+        result[Side.West] = Rectangle.Coordinate(x - 1, y) to this[x - 1, y]
     }
     return result
 }
 
-fun <T> Rectangle<T>.neighbours(coordinate: Rectangle.Coordinate): Map<Side, Pair<T, Rectangle.Coordinate>> =
+fun <T> Rectangle<T>.neighbours(coordinate: Rectangle.Coordinate): Map<Side, Pair<Rectangle.Coordinate, T>> =
     neighbours(coordinate.x, coordinate.y)
 
 fun <T> Rectangle<T>.neighbours(
     coordinate: Rectangle.Coordinate,
     includeCorners: Boolean
-): Map<Set<Side>, Pair<T, Rectangle.Coordinate>> {
-    return coordinate.neighbours(includeCorners).filterValues { isInBounds(it) }.mapValues { (_, v) -> this[v] to v }
+): Map<Set<Side>, Pair<Rectangle.Coordinate, T>> {
+    return coordinate.neighbours(includeCorners).filterValues { isInBounds(it) }.mapValues { (_, v) -> v to this[v] }
 }
 
 fun Rectangle.Coordinate.direction(to: Rectangle.Coordinate): Side {
