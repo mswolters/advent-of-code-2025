@@ -2,6 +2,7 @@ package day
 
 import asLongs
 import multiplied
+import split
 import toRectangle
 
 object Day06 : Day {
@@ -26,18 +27,34 @@ object Day06 : Day {
     }
 
     override fun part2(input: List<String>): Result {
-        return NotImplemented
+        return input.map { it.toCharArray().toList() }.toRectangle().transpose().rows()
+            .map { it.joinToString("") }
+            .split { it.isBlank() }
+            .sumOf { calculateProblem2(it) }.asSuccess()
+    }
+
+    private fun calculateProblem2(problem: List<String>): Long {
+        val op = problem.first().last()
+        val numbers = problem.mapIndexed { index, it -> if (index == 0) it.dropLast(1) else it }
+            .map { it.trim() }
+            .asLongs()
+
+        return when (op) {
+            '+' -> numbers.sum()
+            '*' -> numbers.multiplied()
+            else -> throw IllegalArgumentException("unknown op $op")
+        }
     }
 
     override fun testData(): Day.TestData {
         return Day.TestData(
             4277556,
-            0,
+            3263827,
             """
                 123 328  51 64 
                  45 64  387 23 
                   6 98  215 314
-                *   +   *   + 
+                *   +   *   +  
             """.trimIndent()
                 .lines()
         )
