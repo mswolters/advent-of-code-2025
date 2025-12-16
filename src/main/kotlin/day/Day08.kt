@@ -44,13 +44,38 @@ object Day08 : Day {
     }
 
     override fun part2(input: List<String>): Result {
-        return NotImplemented
+        val boxes = input
+            .map { it.split(",").asInts() }
+            .map { (x, y, z) -> JunctionBox(x, y, z) }
+
+        val distances = boxes
+            .allPairs()
+            .map { (a, b) -> Triple(a, b, a.distanceTo(b)) }
+            .sortedBy { (_, _, distance) -> distance }
+
+        val circuits = boxes.map { setOf(it) }.toMutableList()
+
+        for ((a, b, _) in distances) {
+            // Find the circuits that contain a or b.
+            val toMerge = circuits.filter { it.contains(a) || it.contains(b) }
+            // do nothing if they're already in the same circuit
+            if (toMerge.size > 1) {
+                circuits.removeAll(toMerge)
+                // Merge the circuits together and add to the list of circuits again.
+                if (circuits.isEmpty()) {
+                    return (a.x * b.x).asSuccess()
+                }
+                circuits.add(toMerge.flatten().toMutableSet())
+            }
+        }
+
+        return Crash(IllegalStateException("End reached, but we should return before nodes have been visited"))
     }
 
     override fun testData(): Day.TestData {
         return Day.TestData(
             20,
-            0,
+            25272,
             """
                 162,817,812
                 57,618,57
