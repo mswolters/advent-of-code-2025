@@ -38,6 +38,7 @@ fun <T> Iterable<T>.byNth(n: Int): List<List<T>> {
     }
     return result
 }
+
 fun <T> Iterable<Iterable<T>>.cartesianProduct(): List<List<T>> {
     return this.fold(listOf(listOf())) { acc, list ->
         acc.flatMap { accList -> list.map { accList + it } }
@@ -48,6 +49,19 @@ fun <A, B> Iterable<A>.cartesianProduct(other: Iterable<B>): Sequence<Pair<A, B>
     forEach { a ->
         other.forEach { b ->
             yield(a to b)
+        }
+    }
+}
+
+/**
+ * Returns a sequence of all unique pairs from this list.
+ *
+ * @return A [Sequence] of [Pair]s, where each pair consists of two elements from the list.
+ */
+fun <T> List<T>.allPairs(): Sequence<Pair<T, T>> = sequence {
+    for (i in 0..<size - 1) {
+        for (j in i + 1..<size) {
+            yield(this@allPairs[i] to this@allPairs[j])
         }
     }
 }
