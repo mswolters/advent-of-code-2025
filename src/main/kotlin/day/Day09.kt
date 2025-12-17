@@ -5,9 +5,7 @@ import asInts
 import kotlin.math.abs
 import kotlin.math.max
 import kotlin.math.min
-import kotlin.streams.asSequence
 import kotlin.streams.asStream
-import kotlin.streams.toList
 
 object Day09 : Day {
 
@@ -32,13 +30,10 @@ object Day09 : Day {
             .asStream().parallel()
             .map { (first, last) -> Rect(first, last) }
             .filter { !hasTileInCenter(it, tiles) }
-            .filter { !anyConnectionIntersectsBorder(it, connections) }
             .filter { rectIsInsideArea(it, connections) }
             .toList()
 
         val biggestRect = allRects.maxBy { it.size }
-        println("Biggest = $biggestRect")
-
         return biggestRect.size.asSuccess()
     }
 
@@ -62,42 +57,6 @@ object Day09 : Day {
     private data class Line(val start: Tile, val end: Tile) {
         val isVertical get() = start.x == end.x
         val isHorizontal get() = start.y == end.y
-
-        fun intersects(other: Line): Boolean {
-            // Check if lines are horizontal or vertical and intersect
-            if (isVertical && other.isVertical) return false // Both vertical, same orientation
-            if (isHorizontal && other.isHorizontal) return false // Both horizontal, same orientation
-            if (isVertical) {
-                val x = start.x
-                if (other.isHorizontal) {
-                    val y = other.start.y
-                    return x in (min(other.start.x, other.end.x) + 1)..<max(other.start.x, other.end.x)
-                            && y in (min(start.y, end.y) + 1)..<max(start.y, end.y)
-                }
-            } else if (isHorizontal) {
-                val y = start.y
-                if (other.isVertical) {
-                    val x = other.start.x
-                    return x in (min(start.x, end.x) + 1)..<max(start.x, end.x)
-                            && y in (min(other.start.y, other.end.y) + 1)..<max(other.start.y, other.end.y)
-                }
-            }
-
-            return false // No intersection or lines are of the same orientation
-        }
-    }
-
-    // returns true if the connection between 2 any 2 tiles intersects the rectangle
-    private fun anyConnectionIntersectsBorder(rect: Rect, connections: List<Line>): Boolean {
-
-        val rectLines = listOf(
-            Line(Tile(rect.minX, rect.minY), Tile(rect.maxX, rect.minY)),
-            Line(Tile(rect.maxX, rect.minY), Tile(rect.maxX, rect.maxY)),
-            Line(Tile(rect.maxX, rect.maxY), Tile(rect.minX, rect.maxY)),
-            Line(Tile(rect.minX, rect.maxY), Tile(rect.minX, rect.minY))
-        )
-
-        return connections.any { line -> rectLines.any { it.intersects(line) } }
     }
 
     private fun rectIsInsideArea(rect: Rect, connections: List<Line>): Boolean {
