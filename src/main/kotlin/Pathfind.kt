@@ -48,11 +48,44 @@ fun <N> findPath(start: N, isEnd: (node: N) -> Boolean, data: PathData<N> = Path
     return shortestPath
 }
 
-fun <N> findPathAStar(start: N, isEnd: (node: N) -> Boolean, data: PathData<N> = PathData(mapOf()), edgesForNode: (node: N) -> List<Pair<N, Double>>, potential: (node: N) -> Double): Path<N>? {
-    val modifiedEdgesForNode = { forNode: N ->
-        edgesForNode(forNode)
-            .map { (node, length) -> Pair(node, length + potential(node) - potential(forNode)) }
+fun <N> findPathAStar(start: N, isEnd: (node: N) -> Boolean, data: PathData<N> = PathData(mapOf()), edgesForNode: (node: N) -> List<Pair<N, Double>>, heuristic: (node: N) -> Double): Path<N>? {
+    val nodesToVisit = mutableSetOf(start)
+    val previousNodes = mutableMapOf<N, N>()
+    val actualDistances = mutableMapOf(start to 0.0)
+    val fScores = mutableMapOf(start to heuristic(start))
+
+    var loopcount = 0
+    while (nodesToVisit.isNotEmpty()) {
+        loopcount++
+        val currentNode = nodesToVisit.minBy { fScores[it]!! }
+        if (isEnd(currentNode)) {
+            return reconstructPath(currentNode, previousNodes, actualDistances)
+        }
+
+        nodesToVisit.remove(currentNode)
+        edgesForNode(currentNode).forEach { (neighbour, length) ->
+            val tentativeDistance = actualDistances[currentNode]!! + length
+            if (tentativeDistance < actualDistances.getOrDefault(neighbour, Double.MAX_VALUE)) {
+                previousNodes[neighbour] = currentNode
+                actualDistances[neighbour] = tentativeDistance
+                fScores[neighbour] = tentativeDistance + heuristic(neighbour)
+                nodesToVisit.add(neighbour)
+            }
+        }
+        if (loopcount % 10_000 == 0) {
+            println("Visited $loopcount nodes")
+            println("Current node: $currentNode")
+        }
     }
 
-    return findPath(start = start, isEnd = isEnd, data = data, edgesForNode = modifiedEdgesForNode)
+    return null
+}
+
+fun <N> reconstructPath(current: N, previousNodes: Map<N, N>, distances: Map<N, Double>): Path<N> {
+    val nodes = mutableListOf(current)
+    while (nodes.last() in previousNodes) {
+        val nextNode = previousNodes[nodes.last()]!!
+        nodes += nextNode
+    }
+    return Path(distances[current]!!, nodes.asReversed())
 }
