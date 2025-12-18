@@ -2,12 +2,10 @@ import java.util.*
 import kotlin.math.sign
 
 data class Path<N>(val length: Double, val nodes: List<N>)
-data class PathData<N>(var visitedNodes: Map<N, N> = mapOf(), var distances: Map<N, Double> = mapOf())
 
 fun <N> findPath(
     start: N,
     isEnd: (node: N) -> Boolean,
-    pathData: PathData<N> = PathData(),
     heuristic: (node: N) -> Double = { 0.0 },
     edgesForNode: (node: N) -> List<Pair<N, Double>>
 ): Path<N>? {
@@ -25,9 +23,6 @@ fun <N> findPath(
         }
     nodesToVisit.add(start)
     val previousNodes = mutableMapOf<N, N>()
-
-    pathData.distances = actualDistances
-    pathData.visitedNodes = previousNodes
 
     while (nodesToVisit.isNotEmpty()) {
         val currentNode = nodesToVisit.first()

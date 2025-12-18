@@ -2,8 +2,6 @@ package day
 
 object Day11 : Day {
 
-    private data class Device(val name: String, val edges: List<String>)
-
     override fun part1(input: List<String>): Result {
         val devices = input.associate { line ->
             val splitput = line.split(": ")
